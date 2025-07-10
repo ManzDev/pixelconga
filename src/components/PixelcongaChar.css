@@ -1,0 +1,28 @@
+:host {
+  --width: 32px;
+  --height: 32px;
+  --offset: 16px;
+
+  display: grid;
+  justify-items: center;
+  width: calc(var(--width) + (var(--offset) * 2));
+  translate: var(--x) 0;
+  position: absolute;
+}
+
+.username {
+  font-family: EnterCommand, monospace;
+  font-size: 22px;
+  color: #fff;
+  text-shadow:
+    0 2px 0 #000,
+    2px 0 0 #000,
+    0 -2px 0 #000,
+    -2px 0 0 #000;
+}
+
+.char {
+  width: var(--width);
+  height: var(--height);
+  background: var(--color, white);
+}
