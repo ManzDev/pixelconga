@@ -8,6 +8,9 @@ class PixelcongaChar extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this.status = "walk";
+    this.speed = 5;
+    this.frameCounter = 0;
+    this.render();
   }
 
   get direction() {
@@ -15,10 +18,9 @@ class PixelcongaChar extends HTMLElement {
   }
 
   connectedCallback() {
-    const currentPosition = Math.random() < 0.5 ? 0 - OFFSET : innerWidth + OFFSET;
-    this.updateX(currentPosition);
+    const randomPositionOutsideScreen = Math.random() < 0.5 ? 0 - OFFSET : innerWidth + OFFSET;
+    this.updateX(randomPositionOutsideScreen);
     this.setRandomTarget();
-    this.render();
   }
 
   setNick(username) {
@@ -30,45 +32,81 @@ class PixelcongaChar extends HTMLElement {
     this.setTarget(randomPosition);
   }
 
+  setSpeed(speed) {
+    this.speed = speed;
+  }
+
+  setRandomSpeed() {
+    this.speed = 1 + Math.random() * 10;
+  }
+
+  setCharacter(name) {
+    this.name = name;
+    this.image = `/images/chars/${name}.png`;
+    this.style.setProperty("--image", `url(${this.image})`);
+  }
+
   setTarget(target) {
     this.target = target;
+
+    if (this.x > target) {
+      this.setAttribute("mirror", "");
+    } else {
+      this.removeAttribute("mirror", "");
+    }
   }
 
   setColor(color) {
     this.style.setProperty("--color", color);
   }
 
+  walk() {
+    this.frameCounter++;
+
+    if (this.frameCounter < this.speed) return;
+
+    this.frameCounter = 0;
+    this.setAttribute("animation", "walk");
+
+    if (this.x < this.target) {
+      this.updateX(this.x + 1);
+    } else if (this.x > this.target) {
+      this.updateX(this.x - 1);
+    } else {
+      this.removeAttribute("animation");
+      this.status = "idle";
+      this.waitingCounter = 2000;
+    }
+  }
+
+  idle() {
+    this.setAttribute("animation", "idle");
+    if (this.waitingCounter > 0) {
+      this.waitingCounter--;
+    } else {
+      this.status = "inactive";
+    }
+  }
+
+  inactive() {
+    this.setRandomTarget();
+    this.status = "walk";
+  }
+
   move() {
     switch (this.status) {
       case "walk": {
-        if (this.x < this.target) {
-          this.updateX(this.x + 1);
-        } else if (this.x > this.target) {
-          this.updateX(this.x - 1);
-        } else {
-          this.status = "idle";
-          this.waitingCounter = 2000;
-        }
-
+        this.walk();
         break;
       }
       case "idle": {
-        if (this.waitingCounter > 0) {
-          this.waitingCounter--;
-        } else {
-          this.status = "inactive";
-        }
-
+        this.idle();
         break;
       }
       case "inactive": {
-      /* ... */
-        this.setRandomTarget();
-        this.status = "walk";
-
+        this.inactive();
         break;
       }
-    // No default
     }
   }
 
@@ -80,8 +118,7 @@ class PixelcongaChar extends HTMLElement {
   render() {
     this.shadowRoot.setHTMLUnsafe(/* html */`
       <div class="username"></div>
-      <div class="char">
-      </div>
+      <div class="char"></div>
     `);
     this.shadowRoot.adoptedStyleSheets.push(loaderCss(styles));
   }

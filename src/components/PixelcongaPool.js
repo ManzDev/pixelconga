@@ -1,11 +1,11 @@
-import "./PixelcongaChar.js";
-
 import { client } from "mtmi";
 
+import CharList from "../modules/CharList.js";
 import loaderCss from "../modules/loaderCss.js";
 import styles from "./PixelcongaPool.css?raw";
 
-const CHANNEL = "manzdev";
+const qs = new URL(location.href).searchParams;
+const CHANNEL = qs.get("channel") ?? "manzdev";
 
 class PixelcongaPool extends HTMLElement {
   constructor() {
@@ -13,7 +13,7 @@ class PixelcongaPool extends HTMLElement {
     this.attachShadow({ mode: "open" });
     client.connect({ channels: [CHANNEL] });
     this.loop = this.loop.bind(this);
-    this.characters = [];
+    this.charList = new CharList();
   }
 
   connectedCallback() {
@@ -21,16 +21,15 @@ class PixelcongaPool extends HTMLElement {
     this.container = this.shadowRoot.querySelector(".container");
 
     client.on("message", ({ username, messageInfo, userInfo }) => {
-      const { rawMessage } = messageInfo;
+      const { rawMessage } = messageInfo;   // eslint-disable-line
       const { color } = userInfo;
-      const isPixelConga = rawMessage.toLowerCase() === "!pixelconga";
+
+      // const isPixelConga = rawMessage.toLowerCase() === "!pixelconga";
+      const isPixelConga = true;
 
       if (isPixelConga) {
-        const char = document.createElement("pixelconga-char");
-        this.container.append(char);
-        char.setNick(username);
-        char.setColor(color);
-        this.characters.push(char);
+        const char = this.charList.add(username, { color });
+        if (char) this.container.append(char);
       }
     });
 
@@ -38,16 +37,25 @@ class PixelcongaPool extends HTMLElement {
   }
 
   loop() {
-    console.log("Frame");
-    this.characters.forEach(char => char.move());
+    this.charList.forEach(char => char.style.setProperty("--hitbox", "transparent"));
+
+    this.charList.forEach(char => {
+      this.charList.forEach(opp => {
+        if (char === opp) return;
+
+        const isCollide = Math.abs(char.x - opp.x) < 64;
+
+        if (isCollide) {
+          char.style.setProperty("--hitbox", "red");
+        }
+      });
+    });
+    this.charList.forEach(char => char.move());
     requestAnimationFrame(this.loop);
   }
 
   render() {
-    this.shadowRoot.setHTMLUnsafe(/* html */`
-      <div class="container">
-      </div>
-    `);
+    this.shadowRoot.setHTMLUnsafe(/* html */`<div class="container"></div>`);  // eslint-disable-line
     this.shadowRoot.adoptedStyleSheets.push(loaderCss(styles));
   }
 }

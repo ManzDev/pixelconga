@@ -1,5 +1,11 @@
 ![Logo PixelConga](public/images/logo-small.png)
 
+Sistema de personajes caminando por la base de tu stream. Compatible con Twitch.
+
+**WIP**: Work in progress!
+
+## To do
+
 ### Prioritarias
 
 - Crear una tabla hash para permitir sólo un personaje por usuario

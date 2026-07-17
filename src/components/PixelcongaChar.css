@@ -1,7 +1,9 @@
 :host {
-  --width: 32px;
-  --height: 32px;
+  --width: 64px;
+  --height: 64px;
   --offset: 16px;
+  --frames: 2;
+  --animation-time: 0.5s;
 
   display: grid;
   justify-items: center;
@@ -12,7 +14,7 @@
 
 .username {
   font-family: EnterCommand, monospace;
-  font-size: 22px;
+  font-size: 28px;
   color: #fff;
   text-shadow:
     0 2px 0 #000,
@@ -24,5 +26,26 @@
 .char {
   width: var(--width);
   height: var(--height);
-  background: var(--color, white);
+  background-image: var(--image);
+  background-position: 0 0;
+  background-size: calc(var(--width) * 2) calc(var(--height) * 2);
+  image-rendering: pixelated;
+  background-color: var(--hitbox, transparent);
+
+  :host([mirror]) & {
+    transform: scaleX(-1);
+  }
+
+  :host([animation="idle"]) & { animation: row-1 var(--animation-time) infinite steps(var(--frames)); }
+  :host([animation="walk"]) & { animation: row-2 var(--animation-time) infinite steps(var(--frames)); }
+}
+
+@keyframes row-2 {
+  from { background-position: 0 64px }
+  to { background-position: 128px 64px }
+}
+
+@keyframes row-1 {
+  from { background-position: 0 0 }
+  to { background-position: 128px 0 }
 }

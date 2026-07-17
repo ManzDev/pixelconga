@@ -21,6 +21,6 @@
   "keywords": [],
   "license": "ISC",
   "dependencies": {
-    "mtmi": "^0.0.6"
+    "mtmi": "^0.0.19"
   }
 }

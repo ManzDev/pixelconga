@@ -4,7 +4,7 @@ export default [
   ...recommended,
   {
     rules: {
-      /* Tus reglas aquí */
-	 }
+      "wc/no-exports-with-element": "off"
+    }
   }
 ];
